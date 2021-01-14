@@ -61,7 +61,7 @@ func TestMany(t *testing.T) {
 		Folder:     "Some folder",
 	}
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		t.Run("number", func(t *testing.T) {
 			defer jiratest.Setup(t, detail)()
 

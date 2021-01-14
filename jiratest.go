@@ -3,7 +3,6 @@ package jiratest
 import (
 	"encoding/json"
 	"flag"
-	"io"
 	"os"
 	"path"
 	"sync"
@@ -46,49 +45,30 @@ type testResult struct {
 	TestRunDate        string        `json:"testrun_date"`
 }
 
-var results []testResult
-var resultMut sync.Mutex
-
 var outputFile *os.File
 var outputFileMut sync.Mutex
 
 var directory = flag.String("jira_pwd", "", "go test -v ./... -jira_pwd=$PWD")
 
-func getFile() *os.File {
+func writeResult(result testResult) {
+	if *directory == "" {
+		return
+	}
+
 	outputFileMut.Lock()
 	defer outputFileMut.Unlock()
-	if outputFile != nil {
-		return outputFile
-	}
 
-	file, err := os.Create(path.Join(*directory, "testrun.json"))
-	if err != nil {
-		panic(err)
-	}
-	outputFile = file
-
-	return outputFile
-}
-
-func writeResultsToFile(writer io.Writer) {
-	resultMut.Lock()
-	defer resultMut.Unlock()
-
-	err := json.NewEncoder(writer).Encode(results)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func writeResults() {
-	if *directory != "" {
-		file := getFile()
-		_, err := file.Seek(0, os.SEEK_SET)
+	if outputFile == nil {
+		file, err := os.Create(path.Join(*directory, "testrun.tmp.json"))
 		if err != nil {
 			panic(err)
 		}
+		outputFile = file
+	}
 
-		writeResultsToFile(file)
+	err := json.NewEncoder(outputFile).Encode(result)
+	if err != nil {
+		panic(err)
 	}
 }
 
@@ -124,10 +104,6 @@ func Setup(t *testing.T, detail Detail) func() {
 			TestRunDate:        start.Format(time.RFC3339),
 		}
 
-		resultMut.Lock()
-		results = append(results, result)
-		resultMut.Unlock()
-
-		writeResults()
+		writeResult(result)
 	}
 }
