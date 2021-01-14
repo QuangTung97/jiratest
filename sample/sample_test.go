@@ -53,3 +53,21 @@ func TestAdd(t *testing.T) {
 		})
 	}
 }
+
+func TestMany(t *testing.T) {
+	detail := jiratest.Detail{
+		IssueLinks: []string{"PES-566"},
+		Objective:  "add 2 numbers",
+		Folder:     "Some folder",
+	}
+
+	for i := 0; i < 1000; i++ {
+		t.Run("number", func(t *testing.T) {
+			defer jiratest.Setup(t, detail)()
+
+			if 4+5 != 10 {
+				t.Error(4, "+", 5, "!=", 10)
+			}
+		})
+	}
+}
