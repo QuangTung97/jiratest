@@ -10,8 +10,13 @@ func TestAdd(t *testing.T) {
 		IssueLinks: []string{"PES-566"},
 		Objective:  "add 2 numbers",
 		Folder:     "Some folder",
+		Steps: []string{
+			"- init first",
+			"- call func abcd",
+		},
 	}
 
+	detail.Comment("another step here")
 	table := []struct {
 		name      string
 		objective string
@@ -45,7 +50,7 @@ func TestAdd(t *testing.T) {
 	for _, e := range table {
 		t.Run(e.name, func(t *testing.T) {
 			detail.Objective = e.objective
-			defer jiratest.Setup(t, detail)()
+			defer detail.Setup(t)()
 
 			if e.a+e.b != e.result {
 				t.Error(e.a, "+", e.b, "!=", e.result)
@@ -61,9 +66,9 @@ func TestMany(t *testing.T) {
 		Folder:     "Some folder",
 	}
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 3; i++ {
 		t.Run("number", func(t *testing.T) {
-			defer jiratest.Setup(t, detail)()
+			defer detail.Setup(t)()
 
 			if 4+5 != 10 {
 				t.Error(4, "+", 5, "!=", 10)

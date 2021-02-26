@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"path"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -25,7 +26,7 @@ type Detail struct {
 	WebLinks           []string
 	Folder             string
 	ConfluenceLinks    []string
-	TestScript         TestRunScript
+	Steps              []string
 	TestRunEnvironment string
 }
 
@@ -72,8 +73,20 @@ func writeResult(result testResult) {
 	}
 }
 
+// Comment adds another step to RunScript
+func (detail *Detail) Comment(comment string) {
+	detail.Steps = append(detail.Steps, comment)
+}
+
+func stepsToTestScript(steps []string) TestRunScript {
+	return TestRunScript{
+		Type: "PLAIN_TEXT",
+		Text: strings.Join(steps, "</br>"),
+	}
+}
+
 // Setup set up and tear down a Functional Test Case
-func Setup(t *testing.T, detail Detail) func() {
+func (detail Detail) Setup(t *testing.T) func() {
 	start := time.Now()
 
 	return func() {
@@ -97,7 +110,7 @@ func Setup(t *testing.T, detail Detail) func() {
 			WebLinks:           detail.WebLinks,
 			Folder:             detail.Folder,
 			ConfluenceLinks:    detail.ConfluenceLinks,
-			TestScript:         detail.TestScript,
+			TestScript:         stepsToTestScript(detail.Steps),
 			TestRunStatus:      status,
 			TestRunEnvironment: detail.TestRunEnvironment,
 			TestRunDuration:    float64(d.Milliseconds()) / 1000.0,
