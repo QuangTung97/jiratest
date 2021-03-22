@@ -16,7 +16,6 @@ func TestAdd(t *testing.T) {
 		},
 	}
 
-	detail.Comment("another step here")
 	table := []struct {
 		name      string
 		objective string
@@ -51,6 +50,8 @@ func TestAdd(t *testing.T) {
 		t.Run(e.name, func(t *testing.T) {
 			detail.Objective = e.objective
 			defer detail.Setup(t)()
+
+			detail.Comment("another step")
 
 			if e.a+e.b != e.result {
 				t.Error(e.a, "+", e.b, "!=", e.result)

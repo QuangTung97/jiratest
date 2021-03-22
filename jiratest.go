@@ -60,7 +60,8 @@ func writeResult(result testResult) {
 	defer outputFileMut.Unlock()
 
 	if outputFile == nil {
-		file, err := os.Create(path.Join(*directory, "testrun.tmp.json"))
+		filename := path.Join(*directory, "testrun.tmp.json")
+		file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			panic(err)
 		}
@@ -86,7 +87,7 @@ func stepsToTestScript(steps []string) TestRunScript {
 }
 
 // Setup set up and tear down a Functional Test Case
-func (detail Detail) Setup(t *testing.T) func() {
+func (detail *Detail) Setup(t *testing.T) func() {
 	start := time.Now()
 
 	return func() {
